@@ -10,11 +10,13 @@ def formatType(type):
 
 class C(Backend):
 	@contextmanager
-	def block(self, expr):
+	def block(self, expr, indent=True):
 		self.output += self.ws * self.indentation + expr + ' {\n'
-		self.indentation += 1
+		if indent:
+			self.indentation += 1
 		yield
-		self.indentation -= 1
+		if indent:
+			self.indentation -= 1
 		self.output += self.ws * self.indentation + '}\n'
 
 	def Function(self, name, ret, args, *body):
@@ -28,7 +30,7 @@ class C(Backend):
 		return '(%s) %s (%s)' % (self.generate(a), op, self.generate(b))
 
 	def Switch(self, on, *body):
-		with self.block('switch(%s)' % self.generate(on)):
+		with self.block('switch(%s)' % self.generate(on), indent=False):
 			self.passthru(*body)
 
 	def Case(self, vals, *body):
