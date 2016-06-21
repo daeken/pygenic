@@ -70,6 +70,16 @@ class Python(Backend):
 		with self.block('else'):
 			self.passthru(*body)
 
+	def While(self, expr, *body):
+		with self.block('while %s' % self.generate(expr)):
+			self.passthru(*body)
+
+	def DoWhile(self, expr, *body):
+		with self.block('while True'):
+			self.passthru(*body)
+			with self.block('if not (%s)' % self.generate(expr)):
+				self.emit('break')
+
 	def DebugPrint(self, fmt, *args):
 		return 'print %s%s' % (self.generate(fmt), (' %% (%s)' % ', '.join(map(self.generate, args)) if len(args) else ''))
 

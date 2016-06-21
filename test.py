@@ -6,6 +6,17 @@ module = Module()
 with module.function('foo(bar : int, baz : array[int]) -> int') as func:
 	func.temp = types.int(5)
 	func.temp += 10
+
+	func.temp2 = types.int
+	func.temp2 = func.temp
+
+	with While(func.temp2 > 0):
+		func.temp += 1
+
+	func.temp2 = 10
+	with DoWhile(func.temp2 > 0):
+		func.temp += 2
+
 	with Switch(func.temp):
 		with Case(15, 5):
 			DebugPrint('%i', func.bar)

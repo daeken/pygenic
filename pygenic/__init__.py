@@ -67,7 +67,6 @@ class Node(object):
 		return tuple([self.__class__.__name__ if byName else self.__class__] + [child.sexp(byName=byName) if isinstance(child, Node) else child for child in self.__children])
 
 	def __repr__(self):
-		print 'foo'
 		return `self.sexp(byName=True)`
 
 	def __enter__(self):
@@ -175,6 +174,12 @@ class Elif(Node):
 	pass
 
 class Else(Node):
+	pass
+
+class While(Node):
+	pass
+
+class DoWhile(Node):
 	pass
 
 class DebugPrint(Node):

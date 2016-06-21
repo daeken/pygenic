@@ -10,14 +10,17 @@ def formatType(type):
 
 class C(Backend):
 	@contextmanager
-	def block(self, expr, indent=True):
+	def block(self, expr, end=None, indent=True):
 		self.output += self.ws * self.indentation + expr + ' {\n'
 		if indent:
 			self.indentation += 1
 		yield
 		if indent:
 			self.indentation -= 1
-		self.output += self.ws * self.indentation + '}\n'
+		if end is None:
+			self.output += self.ws * self.indentation + '}\n'
+		else:
+			self.output += self.ws * self.indentation + '} %s;\n' % end
 
 	def emit(self, stmt):
 		self.output += self.ws * self.indentation + stmt + ';\n'
@@ -69,6 +72,14 @@ class C(Backend):
 		with self.block('else'):
 			self.passthru(*body)
 
+	def While(self, expr, *body):
+		with self.block('while(%s)' % self.generate(expr)):
+			self.passthru(*body)
+
+	def DoWhile(self, expr, *body):
+		with self.block('do', end='while(%s)' % self.generate(expr)):
+			self.passthru(*body)
+
 	def DebugPrint(self, fmt, *args):
 		return 'printf(%s%s)' % (self.generate(fmt), (', ' + ', '.join(map(self.generate, args)) if len(args) else ''))
 
@@ -91,5 +102,7 @@ class C(Backend):
 			val = `val + "'"`[:-2] + '"'
 			assert val[0] == '"'
 			return val
+		elif val is None:
+			return '0'
 		else:
 			print 'Unknown Value:', `val`
