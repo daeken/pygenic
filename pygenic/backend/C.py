@@ -4,7 +4,7 @@ from Backend import Backend
 def formatType(type):
 	if isinstance(type, tuple):
 		assert type[0] == 'array'
-		return '*%s' % type[1]
+		return '%s *' % type[1]
 	else:
 		return type
 
@@ -83,6 +83,9 @@ class C(Backend):
 	def DebugPrint(self, fmt, *args):
 		return 'printf(%s%s)' % (self.generate(fmt), (', ' + ', '.join(map(self.generate, args)) if len(args) else ''))
 
+	def Call(self, func, *args):
+		return '%s(%s)' % (func, ', '.join(map(self.generate, args)))
+
 	def Return(self, val=None):
 		if val is None:
 			return 'return'
@@ -94,6 +97,9 @@ class C(Backend):
 			return name
 		else:
 			return '%s %s' % (type, name)
+
+	def Index(self, base, index):
+		return '(%s)[%s]' % (self.generate(base), self.generate(index))
 
 	def Value(self, val):
 		if isinstance(val, int):

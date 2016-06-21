@@ -8,7 +8,7 @@ class Backend(object):
 
 	def tempname(self, prefix='temp'):
 		self.temp_i += 1
-		return '%s_%i' % (prefix, self.temp_i)
+		return '__%s_%i' % (prefix, self.temp_i)
 
 	def generate(self, node):
 		if isinstance(node, Node):

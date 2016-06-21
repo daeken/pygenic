@@ -83,6 +83,9 @@ class Python(Backend):
 	def DebugPrint(self, fmt, *args):
 		return 'print %s%s' % (self.generate(fmt), (' %% (%s)' % ', '.join(map(self.generate, args)) if len(args) else ''))
 
+	def Call(self, func, *args):
+		return '%s(%s)' % (func, ', '.join(map(self.generate, args)))
+
 	def Return(self, val=None):
 		if val is None:
 			return 'return'
@@ -91,6 +94,9 @@ class Python(Backend):
 
 	def Variable(self, name, type=None):
 		return name
+
+	def Index(self, base, index):
+		return '(%s)[%s]' % (self.generate(base), self.generate(index))
 
 	def Value(self, val):
 		return `val`

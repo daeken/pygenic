@@ -120,7 +120,15 @@ class Variable(Node):
 	def __gt__(self, right): return Binary('>', self, right)
 	def __ge__(self, right): return Binary('>=', self, right)
 
+	def __getitem__(self, index):
+		return Index(self, index)
+	def __setitem__(self, index, val):
+		return Assign(Index(self, index), val)
+
 class Assign(Node):
+	pass
+
+class Index(Node):
 	pass
 
 class Binary(Node):
@@ -180,6 +188,9 @@ class While(Node):
 	pass
 
 class DoWhile(Node):
+	pass
+
+class Call(Node):
 	pass
 
 class DebugPrint(Node):
