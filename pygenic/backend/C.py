@@ -32,6 +32,22 @@ class C(Backend):
 	def Binary(self, op, a, b):
 		return '(%s) %s (%s)' % (self.generate(a), op, self.generate(b))
 
+	def And(self, *args):
+		if len(args) == 0:
+			return 'true'
+		elif len(args) == 1:
+			return args[0]
+		else:
+			return ' && '.join('(%s)' % self.generate(arg) for arg in args)
+
+	def Or(self, *args):
+		if len(args) == 0:
+			return 'true'
+		elif len(args) == 1:
+			return args[0]
+		else:
+			return ' || '.join('(%s)' % self.generate(arg) for arg in args)
+
 	def Switch(self, on, *body):
 		with self.block('switch(%s)' % self.generate(on), indent=False):
 			self.passthru(*body)
@@ -40,6 +56,18 @@ class C(Backend):
 		with self.block(' '.join('case %s:' % self.generate(val) for val in vals) if len(vals) else 'default:'):
 			self.passthru(*body)
 			self.emit('break')
+
+	def If(self, expr, *body):
+		with self.block('if(%s)' % self.generate(expr)):
+			self.passthru(*body)
+
+	def Elif(self, expr, *body):
+		with self.block('else if(%s)' % self.generate(expr)):
+			self.passthru(*body)
+
+	def Else(self, *body):
+		with self.block('else'):
+			self.passthru(*body)
 
 	def DebugPrint(self, fmt, *args):
 		return 'printf(%s%s)' % (self.generate(fmt), (', ' + ', '.join(map(self.generate, args)) if len(args) else ''))

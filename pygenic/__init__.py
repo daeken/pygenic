@@ -55,7 +55,10 @@ class Node(object):
 		if node.__parent is not None:
 			if node.__parent is self:
 				return node
-			node.__parent.__children.remove(node)
+			for i, elem in enumerate(node.__parent.__children):
+				if elem is node:
+					del node.__parent.__children[i]
+					break
 		self.__children.append(node)
 		node.__parent = self
 		return node
@@ -98,16 +101,36 @@ class Variable(Node):
 	def set(self, val):
 		return Assign(self, val)
 
-	def __add__(self, right):
-		return Binary('+', self, right)
+	def __add__(self, right): return Binary('+', self, right)
+	def __sub__(self, right): return Binary('-', self, right)
+	def __mul__(self, right): return Binary('*', self, right)
+	def __div__(self, right): return Binary('/', self, right)
+	def __floordiv__(self, right): return Binary('//', self, right)
+	def __pow__(self, right): return Binary('**', self, right)
 
-	def __sub__(self, right):
-		return Binary('-', self, right)
+	def __lshift__(self, right): return Binary('<<', self, right)
+	def __rshift__(self, right): return Binary('>>', self, right)
+	def __and__(self, right): return Binary('&', self, right)
+	def __or__(self, right): return Binary('|', self, right)
+	def __xor__(self, right): return Binary('^', self, right)
+
+	def __lt__(self, right): return Binary('<', self, right)
+	def __le__(self, right): return Binary('<=', self, right)
+	def __eq__(self, right): return Binary('==', self, right)
+	def __ne__(self, right): return Binary('!=', self, right)
+	def __gt__(self, right): return Binary('>', self, right)
+	def __ge__(self, right): return Binary('>=', self, right)
 
 class Assign(Node):
 	pass
 
 class Binary(Node):
+	pass
+
+class And(Node):
+	pass
+
+class Or(Node):
 	pass
 
 class Module(Node):
@@ -144,6 +167,15 @@ class Case(Node):
 	def __init__(self, *matches):
 		Node.__init__(self)
 		self.add(matches)
+
+class If(Node):
+	pass
+
+class Elif(Node):
+	pass
+
+class Else(Node):
+	pass
 
 class DebugPrint(Node):
 	pass

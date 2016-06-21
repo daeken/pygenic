@@ -13,6 +13,12 @@ with module.function('foo(bar : int, baz : array[int]) -> int') as func:
 			func.temp = 100
 			DebugPrint('ten!')
 		with Case():
+			with If(And(func.temp > 50, func.temp < 100)):
+				DebugPrint('...')
+			with Elif(func.temp == 27):
+				DebugPrint('twenty-seven')
+			with Else():
+				DebugPrint('weird')
 			DebugPrint('other %i', func.temp)
 	Return(func.temp)
 

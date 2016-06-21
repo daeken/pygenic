@@ -22,6 +22,22 @@ class Python(Backend):
 	def Binary(self, op, a, b):
 		return '(%s) %s (%s)' % (self.generate(a), op, self.generate(b))
 
+	def And(self, *args):
+		if len(args) == 0:
+			return 'True'
+		elif len(args) == 1:
+			return args[0]
+		else:
+			return ' and '.join('(%s)' % self.generate(arg) for arg in args)
+
+	def Or(self, *args):
+		if len(args) == 0:
+			return 'True'
+		elif len(args) == 1:
+			return args[0]
+		else:
+			return ' or '.join('(%s)' % self.generate(arg) for arg in args)
+
 	def Switch(self, on, *body):
 		temp = self.tempname('switch')
 		self.emit('%s = %s' % (temp, self.generate(on)))
@@ -41,6 +57,18 @@ class Python(Backend):
 			else:
 				with self.block('else'):
 					self.passthru(*default[2:])
+
+	def If(self, expr, *body):
+		with self.block('if %s' % self.generate(expr)):
+			self.passthru(*body)
+
+	def Elif(self, expr, *body):
+		with self.block('elif %s' % self.generate(expr)):
+			self.passthru(*body)
+
+	def Else(self, *body):
+		with self.block('else'):
+			self.passthru(*body)
 
 	def DebugPrint(self, fmt, *args):
 		return 'print %s%s' % (self.generate(fmt), (' %% (%s)' % ', '.join(map(self.generate, args)) if len(args) else ''))
