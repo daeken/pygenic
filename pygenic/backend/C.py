@@ -19,6 +19,9 @@ class C(Backend):
 			self.indentation -= 1
 		self.output += self.ws * self.indentation + '}\n'
 
+	def emit(self, stmt):
+		self.output += self.ws * self.indentation + stmt + ';\n'
+
 	def Function(self, name, ret, args, *body):
 		with self.block('%s %s(%s)' % (formatType(ret), name, ', '.join('%s %s' % (formatType(type), aname) for (aname, type) in args))):
 			self.passthru(*body)
@@ -47,8 +50,11 @@ class C(Backend):
 		else:
 			return 'return %s' % self.generate(val)
 
-	def Variable(self, name):
-		return name
+	def Variable(self, name, type=None):
+		if type is None:
+			return name
+		else:
+			return '%s %s' % (type, name)
 
 	def Value(self, val):
 		if isinstance(val, int):

@@ -7,6 +7,36 @@ class ParseSemantics(object):
 			ast['rule'] = ast._parseinfo.rule
 		return ast
 
+class Type(object):
+	def __init__(self, name, val=None):
+		self.name = name
+		self.val = val
+
+	def __call__(self, val=None):
+		return Type(self.name, val)
+
+class ObjectDict(dict):
+	def __getattr__(self, name):
+		return self[name]
+
+	def __setattr__(self, name, value):
+		self[name] = value
+
+types = ObjectDict(
+	char=Type('int8_t'), 
+	uchar=Type('uint8_t'), 
+	int8=Type('int8_t'), 
+	uint8=Type('uint8_t'), 
+
+	short=Type('int16_t'), 
+	ushort=Type('uint16_t'), 
+	int16=Type('int16_t'), 
+	uint16=Type('uint16_t'), 
+
+	int=Type('int32_t'), 
+	uint=Type('uint32_t'), 
+)
+
 class Node(object):
 	__contexts = []
 
@@ -47,15 +77,22 @@ class Node(object):
 	def __getattr__(self, name):
 		if name.startswith('_Node__'):
 			return object.__getattribute__(self, name[7:])
+		return self[name]
+	def __getitem__(self, name):
 		return self.add(Variable(name))
 
 	def __setattr__(self, name, val):
 		if name.startswith('_Node__'):
 			return object.__setattr__(self, name[7:], val)
+		self[name] = val
+	def __setitem__(self, name, val):
+		type = None
+		if isinstance(val, Type):
+			type, val = val.name, val.val
 		if isinstance(self, Function):
-			return Variable(name).set(val)
+			Variable(name, type).set(val)
 		else:
-			return self.add(Variable(name).set(val))
+			self.add(Variable(name, type).set(val))
 
 class Variable(Node):
 	def set(self, val):

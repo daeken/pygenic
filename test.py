@@ -4,7 +4,7 @@ from pygenic.backend import C, Python
 
 module = Module()
 with module.function('foo(bar : int, baz : array[int]) -> int') as func:
-	func.temp = 5
+	func.temp = types.int(5)
 	func.temp += 10
 	with Switch(func.temp):
 		with Case(15, 5):
@@ -18,4 +18,4 @@ with module.function('foo(bar : int, baz : array[int]) -> int') as func:
 
 pprint(module.sexp(byName=True))
 print C().generate(module)
-#print Python().generate(module)
+print Python().generate(module)

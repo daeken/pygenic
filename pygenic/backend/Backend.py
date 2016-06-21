@@ -3,6 +3,13 @@ from pygenic import *
 class Backend(object):
 	ws = '\t'
 
+	def __init__(self):
+		self.temp_i = 0
+
+	def tempname(self, prefix='temp'):
+		self.temp_i += 1
+		return '%s_%i' % (prefix, self.temp_i)
+
 	def generate(self, node):
 		if isinstance(node, Node):
 			self.output = ''
@@ -13,9 +20,6 @@ class Backend(object):
 			return self.Value(node)
 
 		return getattr(self, node[0])(*node[1:])
-
-	def emit(self, stmt):
-		self.output += self.ws * self.indentation + stmt + ';\n'
 
 	def passthru(self, *args):
 		for arg in args:
