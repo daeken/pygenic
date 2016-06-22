@@ -10,7 +10,8 @@ with module.function('foo(bar : int, baz : array[int]) -> int') as func:
 	func.temp2 = types.int
 	func.temp2 = func.temp
 
-	func.temp3 = types.int(Call('foo', func.temp2 + func.baz[2]))
+	func.temp3 = types.int(Call('test', func.temp2 + func.baz[2]))
+	func.baz[2] = 100
 
 	with While(func.temp2 > 0):
 		func.temp += 1
