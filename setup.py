@@ -5,7 +5,7 @@ setup(name='PyGenic',
 		description='Code generation library', 
 		author='Cody Brocious', 
 		author_email='cody.brocious@gmail.com', 
-		packages=['pygenic'], 
+		packages=['pygenic', 'pygenic.backend'], 
 		install_requires=[
 			'grako',
 		]

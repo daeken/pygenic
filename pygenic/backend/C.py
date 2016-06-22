@@ -25,6 +25,9 @@ class C(Backend):
 	def emit(self, stmt):
 		self.output += self.ws * self.indentation + stmt + ';\n'
 
+	def Comment(self, comment):
+		self.output += self.ws * self.indentation + '/* %s */\n' % comment
+
 	def Function(self, name, ret, args, *body):
 		with self.block('%s %s(%s)' % (formatType(ret), name, ', '.join('%s %s' % (formatType(type), aname) for (aname, type) in args))):
 			self.passthru(*body)

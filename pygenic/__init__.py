@@ -81,12 +81,18 @@ class Node(object):
 			return object.__getattribute__(self, name[7:])
 		return self[name]
 	def __getitem__(self, name):
-		return self.add(Variable(name))
+		if isinstance(name, str) or isinstance(name, unicode):
+			return self.add(Variable(name))
+		else:
+			return Index(self, name)
 
 	def __setattr__(self, name, val):
-		if name.startswith('_Node__'):
-			return object.__setattr__(self, name[7:], val)
-		self[name] = val
+		if isinstance(name, str) or isinstance(name, unicode):
+			if name.startswith('_Node__'):
+				return object.__setattr__(self, name[7:], val)
+			self[name] = val
+		else:
+			Assign(Index(self, name), val)
 	def __setitem__(self, name, val):
 		type = None
 		if isinstance(val, Type):
@@ -95,10 +101,6 @@ class Node(object):
 			Variable(name, type).set(val)
 		else:
 			self.add(Variable(name, type).set(val))
-
-class Variable(Node):
-	def set(self, val):
-		return Assign(self, val)
 
 	def __add__(self, right): return Binary('+', self, right)
 	def __sub__(self, right): return Binary('-', self, right)
@@ -120,10 +122,9 @@ class Variable(Node):
 	def __gt__(self, right): return Binary('>', self, right)
 	def __ge__(self, right): return Binary('>=', self, right)
 
-	def __getitem__(self, index):
-		return Index(self, index)
-	def __setitem__(self, index, val):
-		return Assign(Index(self, index), val)
+class Variable(Node):
+	def set(self, val):
+		return Assign(self, val)
 
 class Assign(Node):
 	pass
@@ -141,10 +142,10 @@ class Or(Node):
 	pass
 
 class Module(Node):
-	def function(self, signature):
-		func = Function(signature=signature)
-		self.add(func)
-		return func
+	pass
+
+class Comment(Node):
+	pass
 
 class Function(Node):
 	def __init__(self, signature=None):
