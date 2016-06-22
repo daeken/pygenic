@@ -3,8 +3,10 @@ from pygenic import *
 class Backend(object):
 	ws = '\t'
 
-	def __init__(self):
+	def __init__(self, hexLiterals=False):
 		self.temp_i = 0
+
+		self.hexLiterals = hexLiterals
 
 	def tempname(self, prefix='temp'):
 		self.temp_i += 1

@@ -102,4 +102,10 @@ class Python(Backend):
 		return '(%s)[%s]' % (self.generate(base), self.generate(index))
 
 	def Value(self, val):
-		return `val`
+		if self.hexLiterals and isinstance(val, int) and not isinstance(val, bool):
+			if val >= 0:
+				return '0x%x' % val
+			else:
+				return '-0x%x' % -val
+		else:
+			return `val`

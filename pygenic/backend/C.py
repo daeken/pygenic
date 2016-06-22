@@ -3,10 +3,14 @@ from Backend import Backend
 
 def formatType(type):
 	if isinstance(type, tuple):
-		assert type[0] == 'array'
-		return '%s *' % type[1]
+		if type[0] == 'array' or type[0] == 'ptr':
+			return '%s *' % type[1].name
+		elif type[0] == 'ref': # C++...
+			return '%s &' % type[1].name
+		else:
+			return 'unknown_%s_%s' % (type[0], type[1].name)
 	else:
-		return type
+		return type.name
 
 class C(Backend):
 	@contextmanager
@@ -105,8 +109,16 @@ class C(Backend):
 		return '(%s)[%s]' % (self.generate(base), self.generate(index))
 
 	def Value(self, val):
-		if isinstance(val, int):
-			return str(val)
+		if val is False or val is True:
+			return 'false' if val is False else 'true'
+		elif isinstance(val, int):
+			if self.hexLiterals:
+				if val >= 0:
+					return '0x%x' % val
+				else:
+					return '-0x%x' % -val
+			else:
+				return str(val)
 		elif isinstance(val, str) or isinstance(val, unicode):
 			val = `val + "'"`[:-2] + '"'
 			assert val[0] == '"'

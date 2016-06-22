@@ -160,13 +160,15 @@ class Function(Node):
 		else:
 			arglist = [ast['args'][0]] + ast['args'][1]
 		rettype = ast['returns']
-		return name, tuple((arg['name'], self.parseType(arg['type'])) for arg in arglist), rettype
+		return name, tuple((arg['name'], self.parseType(arg['type'])) for arg in arglist), self.parseType(rettype)
 
 	def parseType(self, type):
 		if isinstance(type, AST):
 			return (type['cls'], self.parseType(type['arg']))
+		elif type in types:
+			return types[type]
 		else:
-			return type
+			return Type(type)
 
 class Switch(Node):
 	pass
