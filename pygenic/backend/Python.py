@@ -1,7 +1,10 @@
 from contextlib import contextmanager
 from Backend import Backend
 
+@Backend.register
 class Python(Backend):
+	extension = 'py'
+	
 	@contextmanager
 	def block(self, expr):
 		self.output += self.ws * self.indentation + expr + ':\n'
@@ -13,7 +16,7 @@ class Python(Backend):
 		self.output += self.ws * self.indentation + stmt + '\n'
 
 	def Comment(self, comment):
-		self.output += self.ws * self.indentation + '# %s\n' % comment
+		self.output += self.ws * self.indentation + 'pass # %s\n' % comment
 
 	def Function(self, name, ret, args, *body):
 		with self.block('def %s(%s)' % (name, ', '.join(aname for (aname, type) in args))):

@@ -1,9 +1,15 @@
 from pygenic import *
 
 class Backend(object):
+	backends = {}
+	@staticmethod
+	def register(cls):
+		Backend.backends[cls.__name__.lower()] = cls
+		return cls
+
 	ws = '\t'
 
-	def __init__(self, hexLiterals=False):
+	def __init__(self, hexLiterals=True):
 		self.temp_i = 0
 
 		self.hexLiterals = hexLiterals

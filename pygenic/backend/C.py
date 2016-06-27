@@ -12,7 +12,10 @@ def formatType(type):
 	else:
 		return type.name
 
+@Backend.register
 class C(Backend):
+	extension = 'c'
+
 	@contextmanager
 	def block(self, expr, end=None, indent=True):
 		self.output += self.ws * self.indentation + expr + ' {\n'
