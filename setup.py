@@ -1,7 +1,7 @@
 from distutils.core import setup
 
 setup(name='PyGenic',
-		version='0.1', 
+		version='0.2', 
 		description='Code generation library', 
 		author='Cody Brocious', 
 		author_email='cody.brocious@gmail.com', 
