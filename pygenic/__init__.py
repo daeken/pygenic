@@ -1,6 +1,6 @@
-from signature import signatureParser
-from grako.ast import AST
 from copy import deepcopy
+from grako.ast import AST
+from signature import signatureParser
 
 class ParseSemantics(object):
 	def _default(self, ast, *args, **kwargs):
@@ -48,7 +48,7 @@ types = ObjectDict(
 
 class Node(object):
 	__contexts = []
-
+	
 	def __init__(self, *args):
 		self._node_parent = None
 		self._node_children = []
@@ -258,3 +258,5 @@ class Return(Node):
 
 class Cast(Node):
 	pass
+
+from Transform import Transform
