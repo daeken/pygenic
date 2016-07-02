@@ -42,6 +42,9 @@ class C(Backend):
 	def Assign(self, name, value):
 		return '%s = %s' % (self.generate(name), self.generate(value))
 
+	def Unary(self, op, a):
+		return '%s(%s)' % (op, self.generate(a))
+
 	def Binary(self, op, a, b):
 		return '(%s) %s (%s)' % (self.generate(a), op, self.generate(b))
 
@@ -124,9 +127,13 @@ class C(Backend):
 				return str(val)
 		elif isinstance(val, str) or isinstance(val, unicode):
 			val = `val + "'"`[:-2] + '"'
+			val = val[1:] if val[0] == 'u' else val
 			assert val[0] == '"'
 			return val
 		elif val is None:
 			return '0'
 		else:
 			print 'Unknown Value:', `val`
+
+	def Cast(self, value, type):
+		return '(%s)(%s)' % (formatType(type), self.generate(value))

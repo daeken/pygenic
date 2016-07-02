@@ -25,6 +25,9 @@ class Python(Backend):
 	def Assign(self, name, value):
 		return '%s = %s' % (self.generate(name), self.generate(value))
 
+	def Unary(self, op, a):
+		return '%s(%s)' % (op, self.generate(a))
+	
 	def Binary(self, op, a, b):
 		return '(%s) %s (%s)' % (self.generate(a), op, self.generate(b))
 
@@ -112,3 +115,7 @@ class Python(Backend):
 				return '-0x%x' % -val
 		else:
 			return `val`
+
+	def Cast(self, value, type):
+		# XXX: This needs to handle signedness and int/float conversions!
+		return '(%s)' % self.generate(value)

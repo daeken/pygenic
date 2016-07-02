@@ -1,5 +1,6 @@
 from signature import signatureParser
 from grako.ast import AST
+from copy import deepcopy
 
 class ParseSemantics(object):
 	def _default(self, ast, *args, **kwargs):
@@ -14,6 +15,9 @@ class Type(object):
 
 	def __call__(self, val=None):
 		return Type(self.name, val)
+
+	def __repr__(self):
+		return 'pygenic.Type(%r, %r)' % (self.name, self.val)
 
 class ObjectDict(dict):
 	def __getattr__(self, name):
@@ -34,37 +38,69 @@ types = ObjectDict(
 	uint16=Type('uint16_t'), 
 
 	int=Type('int32_t'), 
+	int32=Type('int32_t'), 
 	uint=Type('uint32_t'), 
+	uint32=Type('uint32_t'), 
+
+	int64=Type('int64_t'), 
+	uint64=Type('uint64_t'), 
 )
 
 class Node(object):
 	__contexts = []
 
 	def __init__(self, *args):
-		self.__parent = None
-		self.__children = []
+		self._node_parent = None
+		self._node_children = []
 		for arg in args:
 			self.add(arg)
 		if len(Node.__contexts):
 			Node.__contexts[-1].add(self)
 
+	def __deepcopy__(self, memo):
+		ret = self.__class__.__new__(self.__class__)
+		ret._node_parent = None
+		ret._node_children = deepcopy(self._node_children)
+		return ret
+
 	def add(self, node):
 		if not isinstance(node, Node):
-			self.__children.append(node)
+			self._node_children.append(node)
 			return node
-		if node.__parent is not None:
-			if node.__parent is self:
+		if node._node_parent is not None:
+			if node._node_parent is self:
 				return node
-			for i, elem in enumerate(node.__parent.__children):
+			for i, elem in enumerate(node._node_parent._node_children):
 				if elem is node:
-					del node.__parent.__children[i]
+					del node._node_parent._node_children[i]
 					break
-		self.__children.append(node)
-		node.__parent = self
+		self._node_children.append(node)
+		node._node_parent = self
 		return node
 
 	def sexp(self, byName=False):
-		return tuple([self.__class__.__name__ if byName else self.__class__] + [child.sexp(byName=byName) if isinstance(child, Node) else child for child in self.__children])
+		return tuple(
+			[self.__class__.__name__ if byName else self.__class__] + 
+			[child.sexp(byName=byName) if isinstance(child, Node) else child for child in self._node_children]
+		)
+
+	def map(self, type, callback):
+		def addall(ret):
+			if isinstance(ret, list) or isinstance(ret, tuple):
+				map(addall, ret)
+			else:
+				node.add(ret)
+		if isinstance(self, type):
+			return callback(self)
+		with self.__class__() as node:
+			for child in self._node_children:
+				if isinstance(child, Node):
+					ret = child.map(type, callback)
+					if ret is not None:
+						addall(ret)
+				else:
+					node.add(child)
+		return node
 
 	def __repr__(self):
 		return `self.sexp(byName=True)`
@@ -77,7 +113,7 @@ class Node(object):
 		Node.__contexts.pop()
 
 	def __getattr__(self, name):
-		if name.startswith('_Node__'):
+		if name.startswith('_node_'):
 			return object.__getattribute__(self, name[7:])
 		return self[name]
 	def __getitem__(self, name):
@@ -88,7 +124,7 @@ class Node(object):
 
 	def __setattr__(self, name, val):
 		if isinstance(name, str) or isinstance(name, unicode):
-			if name.startswith('_Node__'):
+			if name.startswith('_node_'):
 				return object.__setattr__(self, name[7:], val)
 			self[name] = val
 		else:
@@ -126,10 +162,16 @@ class Variable(Node):
 	def set(self, val):
 		return Assign(self, val)
 
+	def __setitem__(self, name, val):
+		Assign(Index(self, name), val)
+
 class Assign(Node):
 	pass
 
 class Index(Node):
+	pass
+
+class Unary(Node):
 	pass
 
 class Binary(Node):
@@ -149,8 +191,11 @@ class Comment(Node):
 
 class Function(Node):
 	def __init__(self, signature=None):
-		name, args, ret = self.parse(signature)
-		Node.__init__(self, name, ret, args)
+		if signature is not None:
+			name, args, ret = self.parse(signature)
+			Node.__init__(self, name, ret, args)
+		else:
+			Node.__init__(self)
 
 	def parse(self, signature):
 		ast = signatureParser(parseinfo=True).parse(signature, 'signature', semantics=ParseSemantics())
@@ -178,6 +223,15 @@ class Case(Node):
 		Node.__init__(self)
 		self.add(matches)
 
+	def add(self, node):
+		if isinstance(node, Node):
+			return Node.add(self, node)
+		if isinstance(node, Node) or not (len(self._node_children) == 1 and self._node_children[0] == ()):
+			return Node.add(self, node)
+
+		self._node_children[0] = node
+		return node
+
 class If(Node):
 	pass
 
@@ -200,4 +254,7 @@ class DebugPrint(Node):
 	pass
 
 class Return(Node):
+	pass
+
+class Cast(Node):
 	pass
