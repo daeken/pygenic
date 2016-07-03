@@ -63,9 +63,12 @@ class Node(object):
 		ret._node_children = deepcopy(self._node_children)
 		return ret
 
-	def add(self, node):
+	def add(self, node, position=None):
 		if not isinstance(node, Node):
-			self._node_children.append(node)
+			if position is None:
+				self._node_children.append(node)
+			else:
+				self._node_children.insert(position, node)
 			return node
 		if node._node_parent is not None:
 			if node._node_parent is self:
@@ -74,7 +77,10 @@ class Node(object):
 				if elem is node:
 					del node._node_parent._node_children[i]
 					break
-		self._node_children.append(node)
+		if position is None:
+			self._node_children.append(node)
+		else:
+			self._node_children.insert(position, node)
 		node._node_parent = self
 		return node
 
@@ -101,6 +107,19 @@ class Node(object):
 				else:
 					node.add(child)
 		return node
+
+	def search(self, type, callback):
+		if isinstance(self, type):
+			return callback(self)
+		for child in self._node_children:
+			if isinstance(child, Node):
+				child.search(type, callback)
+
+	def findChild(self, node):
+		for i, child in enumerate(self._node_children):
+			if child is node:
+				return i
+		return -1
 
 	def __repr__(self):
 		return `self.sexp(byName=True)`
@@ -223,11 +242,11 @@ class Case(Node):
 		Node.__init__(self)
 		self.add(matches)
 
-	def add(self, node):
+	def add(self, node, position=None):
 		if isinstance(node, Node):
-			return Node.add(self, node)
+			return Node.add(self, node, position=position)
 		if isinstance(node, Node) or not (len(self._node_children) == 1 and self._node_children[0] == ()):
-			return Node.add(self, node)
+			return Node.add(self, node, position=position)
 
 		self._node_children[0] = node
 		return node
