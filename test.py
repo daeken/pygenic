@@ -1,6 +1,6 @@
 from pprint import pprint
 from pygenic import *
-from pygenic.backend import C, Python
+from pygenic.backend import Cpp, Python
 
 with Module() as module:
 	Comment('Module level')
@@ -40,5 +40,5 @@ with Module() as module:
 		Return(func.temp)
 
 pprint(module.sexp(byName=True))
-print C().generate(module)
+print Cpp().generate(module)
 print Python().generate(module)
